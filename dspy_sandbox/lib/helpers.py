@@ -10,7 +10,55 @@ import json
 import time
 from typing import Any, Dict, List, Optional
 from datetime import datetime
+from collections import namedtuple
 import dspy
+from dspy import BaseLM
+
+# Simple response objects for mock LM
+class MockChoice:
+    """Represents a choice in the LM response."""
+    def __init__(self, text: str, finish_reason: str = "stop"):
+        self.text = text
+        self.finish_reason = finish_reason
+        # Support numeric index access like a tuple
+        self._data = [text, finish_reason]
+
+    def __getitem__(self, key):
+        """Support both dict-like and numeric access."""
+        if isinstance(key, int):
+            return self._data[key]
+        return getattr(self, key)
+
+class MockUsage:
+    """Represents token usage in the response."""
+    def __init__(self, prompt_tokens: int, completion_tokens: int):
+        self.prompt_tokens = prompt_tokens
+        self.completion_tokens = completion_tokens
+        self.total_tokens = prompt_tokens + completion_tokens
+        self._data = [prompt_tokens, completion_tokens, prompt_tokens + completion_tokens]
+
+    def __getitem__(self, key):
+        """Support both dict-like and numeric access."""
+        if isinstance(key, int):
+            return self._data[key]
+        return getattr(self, key)
+
+class MockResponse:
+    """Simple response object mimicking OpenAI response structure."""
+    def __init__(self, text: str, prompt_tokens: int, completion_tokens: int):
+        self.choices = [MockChoice(text=text, finish_reason="stop")]
+        self.usage = MockUsage(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens)
+        self._data = [self.choices, self.usage]
+
+    def __getitem__(self, key):
+        """Support both dict-like and numeric access."""
+        if isinstance(key, int):
+            return self._data[key]
+        return getattr(self, key)
+
+    def keys(self):
+        """Support dict-like keys() method."""
+        return ['choices', 'usage']
 
 class ScriptingHelper:
     """Utilities for demonstrating the scripting paradigm."""
@@ -71,10 +119,11 @@ class ScriptingHelper:
         print("=" * 60)
 
 
-class MockLM:
+class MockLM(dspy.BaseLM):
     """A mock language model for demonstration without API keys."""
 
     def __init__(self, responses: Optional[Dict[str, str]] = None):
+        super().__init__(model="mock")
         self.responses = responses or self._default_responses()
         self.call_history = []
 
@@ -89,23 +138,36 @@ class MockLM:
             "explain": "This code does X by using Y approach.",
         }
 
-    def __call__(self, prompt: str, **kwargs) -> List[str]:
-        """Mock LM call that returns appropriate responses."""
+    def forward(self, prompt=None, messages=None, **kwargs):
+        """Mock LM forward call matching DSPy's interface."""
+        # Handle both prompt and messages formats
+        if prompt is None and messages is not None:
+            # For chat-based calls, extract from messages
+            full_text = " ".join([msg.get("content", "") for msg in messages])
+        else:
+            full_text = prompt or ""
+
         self.call_history.append({
             "timestamp": datetime.now(),
-            "prompt": prompt,
+            "prompt": full_text,
             "kwargs": kwargs
         })
 
-        # Try to match patterns in prompt
-        prompt_lower = prompt.lower()
+        # Try to match patterns
+        text_lower = full_text.lower()
 
+        response_text = "This is a mock response for demonstration purposes."
         for key, response in self.responses.items():
-            if key in prompt_lower:
-                return [response]
+            if key in text_lower:
+                response_text = response
+                break
 
-        # Default response
-        return ["This is a mock response for demonstration purposes."]
+        # Return in OpenAI response format
+        return MockResponse(
+            text=response_text,
+            prompt_tokens=len(full_text.split()),
+            completion_tokens=len(response_text.split())
+        )
 
     def show_history(self) -> None:
         """Display the call history for educational purposes."""
