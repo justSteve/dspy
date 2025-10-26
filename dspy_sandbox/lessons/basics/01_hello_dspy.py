@@ -17,13 +17,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 import dspy
-from dspy import LM
-import os
-from lib.helpers import MockLM, setup_mock_environment
-
-def _setup_mock_lm():
-    """Setup a mock language model."""
-    setup_mock_environment()
+from lib.providers import setup_sandbox_lm, show_provider_info
 
 def main():
     print("🎯 Lesson 01: Hello DSPy\n")
@@ -60,28 +54,25 @@ This approach has problems:
     print()
 
     # Step 1: Configure DSPy with a language model
-    # For this lesson, we'll use a mock LM that shows what's happening
     print("Step 1: Configure DSPy")
     print("```python")
-    print("lm = dspy.LM('openai/gpt-4o-mini')")
+    print("# Auto-detects available API keys (Anthropic, OpenAI, or Mock)")
+    print("lm = get_lm()")
     print("dspy.configure(lm=lm)")
     print("```")
+    print()
 
-    # Use a simple mock for demonstration
-    # In real usage, you'd use: lm = dspy.LM('openai/gpt-4o-mini')
+    # Show which providers are available
+    show_provider_info()
 
-    if os.getenv("OPENAI_API_KEY"):
-        try:
-            lm = dspy.LM('openai/gpt-4o-mini')
-            dspy.configure(lm=lm)
-            print("✓ Connected to OpenAI GPT-4o-mini\n")
-        except Exception as e:
-            print(f"ℹ️  Using mock LM for demonstration (API error: {type(e).__name__})\n")
-            _setup_mock_lm()
-    else:
-        # Fall back to mock for demonstration
-        print("ℹ️  Using mock LM for demonstration (no OPENAI_API_KEY found)\n")
-        _setup_mock_lm()
+    # Configure DSPy with the best available provider
+    print("Configuring DSPy...")
+    try:
+        lm = setup_sandbox_lm(verbose=True)
+        print()
+    except Exception as e:
+        print(f"❌ Configuration error: {e}\n")
+        return {"status": "error", "message": str(e)}
 
     # Step 2: Define a Signature (the contract)
     print("Step 2: Define the Input/Output Contract")
