@@ -1,0 +1,248 @@
+The project will address the goal of learning how to use DSPy to code interactions with AI Agents.
+
+Interactive DSPy teaching repo
+You’re aiming for something that teaches concepts, invites tinkering, and makes results visible. Here’s a complete repo blueprint designed as a learning path plus a sandbox, with progressive modules, visual dashboards, and reproducible experiments.
+
+Goals and pedagogy
+- Progressive learning: Start with primitives and build toward full pipelines.
+- Visual feedback: Plot metrics, prompt diffs, and error cases to show “why” improvements happen.
+- Hands-on sandbox: Templates + sliders + config toggles to let learners explore rapidly.
+- Reproducibility: Seeded datasets, deterministic configs, CI checks.
+- Extensibility: Clear interface boundaries for plugging in new models, datasets, and evaluators.
+
+Repository structure
+dspy-sandbox/
++- README.md
++- LICENSE
++- docs/
+¦  +- index.md
+¦  +- concepts/
+¦  ¦  +- dspy-modules.md
+¦  ¦  +- optimization-strategies.md
+¦  ¦  +- evaluation-metrics.md
+¦  ¦  +- failure-analysis.md
+¦  +- tutorials/
+¦  ¦  +- 01_getting_started.md
+¦  ¦  +- 02_prompt_programming.md
+¦  ¦  +- 03_optimization.md
+¦  ¦  +- 04_evaluation.md
+¦  ¦  +- 05_visualization.md
++- environment.yml            # conda env (or requirements.txt)
++- requirements.txt           # alt pip env
++- dspy_sandbox/
+¦  +- __init__.py
+¦  +- core/
+¦  ¦  +- pipeline.py          # pipeline abstraction + runner
+¦  ¦  +- modules.py           # DSPy modules (Chains, Signatures)
+¦  ¦  +- optimizers.py        # tuning strategies
+¦  ¦  +- evaluators.py        # metrics and harness
+¦  ¦  +- registry.py          # dataset/model registry
+¦  +- data/
+¦  ¦  +- receipts.jsonl       # example structured extraction
+¦  ¦  +- qa_small.jsonl       # toy QA dataset
+¦  ¦  +- sentiment.jsonl
+¦  +- viz/
+¦  ¦  +- dashboards.py        # Streamlit dashboards
+¦  ¦  +- charts.py            # Plotly helpers
+¦  ¦  +- diffs.py             # prompt/result diffs
+¦  +- sandbox/
+¦  ¦  +- configs/
+¦  ¦  ¦  +- base.yaml
+¦  ¦  ¦  +- optimizer_grid.yaml
+¦  ¦  ¦  +- model_local.yaml
+¦  ¦  +- experiments/
+¦  ¦  ¦  +- exp_receipts.yaml
+¦  ¦  ¦  +- exp_qa.yaml
+¦  ¦  +- run.py               # CLI to launch experiments
++- notebooks/
+¦  +- 01_intro.ipynb          # DSPy basics
+¦  +- 02_signatures.ipynb     # schema-driven tasks
+¦  +- 03_optimizers.ipynb     # automatic tuning
+¦  +- 04_evaluation.ipynb     # metrics + error buckets
+¦  +- 05_visualization.ipynb  # charts + dashboards
++- app/
+¦  +- streamlit_app.py        # interactive UI
+¦  +- components/
+¦     +- controls.py          # sliders, pickers
+¦     +- views.py             # pages
+¦     +- state.py
++- tests/
+¦  +- test_pipeline.py
+¦  +- test_evaluators.py
+¦  +- test_viz.py
++- .github/
+¦  +- workflows/
+¦  ¦  +- ci.yaml              # lint, tests, nbconvert checks
+¦  +- ISSUE_TEMPLATE.md
++- pyproject.toml             # tooling config (ruff, black, pytest)
+
+
+
+Setup and quick start
+- Environment: Python 3.10+, DSPy, Plotly, Streamlit, Pandas, scikit-learn, rich.
+- Install:
+- pip: pip install -r requirements.txt
+- conda: conda env create -f environment.yml && conda activate dspy-sandbox
+- Run notebooks: jupyter lab
+- Launch UI: streamlit run app/streamlit_app.py
+- Run experiment: python dspy_sandbox/sandbox/run.py --config sandbox/experiments/exp_receipts.yaml
+
+Core teaching modules
+Foundations
+- DSPy signatures: Define input/output schemas for tasks.
+- Composable modules: Chain steps with explicit interfaces.
+- Prompt programs vs. freeform prompts: Benefits for reliability.
+Optimization strategies
+- Grid search: Over templates, instructions, constraints.
+- Self-evaluation loops: Model-graded improvements.
+- Few-shot selection: Automatic example curation.
+- Structured scoring: Accuracy, F1, calibration, latency, cost.
+Evaluation and failure analysis
+- Error buckets: Classify failures (format, hallucination, extraction errors).
+- Counterfactuals: Minimal edits to inputs to test robustness.
+- A/B tests: Compare runs across seeds and models.
+
+Interactive visualization
+- Prompt diffs: Side-by-side original vs. optimized; highlight added constraints.
+- Metric timelines: Show improvement per iteration and cost trade-offs.
+- Confusion matrices: For classification tasks.
+- Schema adherence heatmaps: Where outputs violate signatures.
+- Event log explorer: Drill into each optimization step.
+Example Streamlit page layout:
+# app/streamlit_app.py
+import streamlit as st
+from dspy_sandbox.viz.dashboards import show_optimizer_dashboard, show_prompt_diff
+from dspy_sandbox.core.pipeline import load_experiment
+
+st.set_page_config(page_title="DSPy Sandbox", layout="wide")
+
+st.sidebar.title("Experiment")
+exp = st.sidebar.selectbox("Choose", ["Receipts", "QA"])
+config_path = f"sandbox/experiments/exp_{exp.lower()}.yaml"
+
+run = load_experiment(config_path)
+if st.button("Run optimization"):
+    results = run.execute()
+    st.success("Completed.")
+
+show_optimizer_dashboard(run.history)
+show_prompt_diff(run.history)
+
+??
+
+Minimal pipeline example
+Show learners the “smallest viable DSPy program,” then iterate.
+# dspy_sandbox/core/modules.py
+from dataclasses import dataclass
+
+@dataclass
+class ReceiptSignature:
+    text: str
+    merchant: str
+    date: str
+    total: float
+
+class ReceiptExtractor:
+    def __init__(self, model, template):
+        self.model = model
+        self.template = template
+
+    def __call__(self, text):
+        prompt = self.template.format(text=text)
+        raw = self.model.generate(prompt)
+        return self._parse(raw)
+
+    def _parse(self, raw):
+        # naive parsing; replaced by robust parser in later lessons
+        # Expect JSON keys merchant, date, total
+        import json
+        data = json.loads(raw)
+        return data
+
+
+# dspy_sandbox/core/optimizers.py
+class TemplateOptimizer:
+    def __init__(self, model, evaluator, candidates):
+        self.model = model
+        self.evaluator = evaluator
+        self.candidates = candidates
+        self.history = []
+
+    def tune(self, module, dataset):
+        best_score, best_tpl = -1, None
+        for tpl in self.candidates:
+            module.template = tpl
+            score = self.evaluator.evaluate(module, dataset)
+            self.history.append({"template": tpl, "score": score})
+            if score > best_score:
+                best_score, best_tpl = score, tpl
+        module.template = best_tpl
+        return module, best_score
+
+
+# dspy_sandbox/core/evaluators.py
+import numpy as np
+
+class ExactMatchEvaluator:
+    def evaluate(self, module, dataset):
+        correct = 0
+        for ex in dataset:
+            pred = module(ex["text"])
+            correct += int(pred["merchant"] == ex["merchant"])
+        return correct / len(dataset)
+
+
+
+Sandbox configs and reproducible experiments
+# dspy_sandbox/sandbox/experiments/exp_receipts.yaml
+experiment: receipts_extraction
+model:
+  provider: "openai"         # swapable
+  name: "gpt-4o-mini"
+  temperature: 0.2
+optimizer:
+  type: "TemplateOptimizer"
+  candidates:
+    - |
+      You are a precise extractor. Return valid JSON:
+      {"merchant":..., "date":..., "total":...}
+      Text: "{text}"
+    - |
+      Extract merchant, date (YYYY-MM-DD), and total (float).
+      Only output JSON. Input: "{text}"
+dataset:
+  path: "dspy_sandbox/data/receipts.jsonl"
+evaluation:
+  metric: "ExactMatch"
+logging:
+  save_history: true
+  outdir: "runs/receipts"
+
+
+
+Notebooks as guided lessons
+- 01_intro: Run simple signature-based tasks, explain deterministic configs.
+- 02_signatures: Compare freeform vs. schema-constrained outputs.
+- 03_optimizers: Tune prompts; plot iteration metrics.
+- 04_evaluation: Build an evaluator; add error buckets.
+- 05_visualization: Construct diff views and dashboards; export reports.
+
+CI, quality, and reproducibility
+- Lint and format: ruff + black to keep code clean.
+- Unit tests: pipelines, evaluators, viz utilities; sample fixtures.
+- Notebook checks: nbconvert to ensure notebooks execute.
+- Seed control: fixed seeds where applicable; log model metadata.
+- Artifacts: save configs, prompts, outputs, metrics to runs/<timestamp>.
+
+Roadmap
+- Phase 1: Minimal pipelines, two datasets, single optimizer, Streamlit UI.
+- Phase 2: Add few-shot selector, self-eval loop, richer metrics, cost tracking.
+- Phase 3: Plug-in backends (local or cloud), caching, dataset versioning, exportable reports.
+- Phase 4: Advanced lessons on robustness, calibration, and domain adaptation.
+
+What I need from you to tailor this
+- Model/backends: Which providers you want to support first.
+- Primary dataset: First teaching use case (receipts, QA for your site, sentiment from family stories).
+- Deployment target: Local only, or do you want GitHub Pages (docs) + Streamlit Cloud?
+- License preference: MIT or Apache-2.0.
+If you want, I’ll generate the initial repo skeleton and copy-ready files based on your choices.
