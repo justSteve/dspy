@@ -342,7 +342,7 @@ Given a few tens or hundreds of representative _inputs_ of your task and a _metr
         import dspy
         from dspy.datasets import HotPotQA
 
-        dspy.configure(lm=dspy.LM("openai/gpt-4o-mini"))
+        dspy.configure(lm=dspy.LM("anthropic/claude-3-5-sonnet-20241022"))
 
         def search_wikipedia(query: str) -> list[str]:
             results = dspy.ColBERTv2(url="http://20.102.90.50:2017/wiki17_abstracts")(query, k=3)
@@ -403,7 +403,7 @@ Given a few tens or hundreds of representative _inputs_ of your task and a _metr
 
         ```python linenums="1"
         import dspy
-        lm=dspy.LM('openai/gpt-4o-mini-2024-07-18')
+        lm=dspy.LM('anthropic/claude-3-5-sonnet-20241022')
 
         # Define the DSPy module for classification. It will use the hint at training time, if available.
         signature = dspy.Signature("text, hint -> label").with_updated_fields("label", type_=Literal[tuple(CLASSES)])

@@ -6,10 +6,9 @@ sidebar_position: 5
 
 DSPy is a machine learning framework, so working in it involves training sets, development sets, and test sets. For each example in your data, we distinguish typically between three types of values: the inputs, the intermediate labels, and the final label. You can use DSPy effectively without any intermediate or final labels, but you will need at least a few example inputs.
 
-
 ## DSPy `Example` objects
 
-The core data type for data in DSPy is `Example`. You will use **Examples** to represent items in your training set and test set. 
+The core data type for data in DSPy is `Example`. You will use **Examples** to represent items in your training set and test set.
 
 DSPy **Examples** are similar to Python `dict`s but have a few useful utilities. Your DSPy modules will return values of the type `Prediction`, which is a special sub-class of `Example`.
 
@@ -22,7 +21,9 @@ print(qa_pair)
 print(qa_pair.question)
 print(qa_pair.answer)
 ```
+
 **Output:**
+
 ```text
 Example({'question': 'This is a question?', 'answer': 'This is an answer.'}) (input_keys=None)
 This is a question?
@@ -56,7 +57,7 @@ print(qa_pair.with_inputs("question"))
 print(qa_pair.with_inputs("question", "answer"))
 ```
 
-Values can be accessed using the `.`(dot) operator. You can access the value of key `name` in defined object `Example(name="John Doe", job="sleep")` through `object.name`. 
+Values can be accessed using the `.`(dot) operator. You can access the value of key `name` in defined object `Example(name="John Doe", job="sleep")` through `object.name`.
 
 To access or exclude certain keys, use `inputs()` and `labels()` methods to return new Example objects containing only input or non-input keys, respectively.
 
@@ -70,8 +71,9 @@ print("Example object with Input fields only:", input_key_only)
 print("Example object with Non-Input fields only:", non_input_key_only)
 ```
 
-**Output**
-```
+## Output
+
+```text
 Example object with Input fields only: Example({'article': 'This is an article.'}) (input_keys={'article'})
 Example object with Non-Input fields only: Example({'summary': 'This is a summary.'}) (input_keys=None)
 ```
