@@ -8,6 +8,15 @@ This sandbox treats LLM interactions as **scripted operations** rather than conv
 
 ## Quick Start
 
+### 1. Install Dependencies (First Time Only)
+
+```bash
+# From dspy_sandbox directory
+pip install -r requirements.txt
+```
+
+### 2. Run Your First Lesson
+
 ```bash
 # Run your first DSPy script
 python run.py lesson 01_hello_dspy
@@ -21,6 +30,30 @@ python run.py lesson 01_hello_dspy --verbose
 # Compare two approaches
 python run.py compare 02_chat_vs_script
 ```
+
+### 3. Configure Your LM Provider
+
+The sandbox automatically detects available API keys in this order:
+1. **Anthropic** (if `ANTHROPIC_API_KEY` is set)
+2. **OpenAI** (if `OPENAI_API_KEY` is set)
+3. **Mock LM** (no API key needed, for learning offline)
+
+```bash
+# Example: Use Anthropic (recommended)
+export ANTHROPIC_API_KEY='sk-ant-...'
+python run.py lesson 01_hello_dspy
+
+# Example: Force OpenAI
+export OPENAI_API_KEY='sk-...'
+export LM_PROVIDER='openai'
+python run.py lesson 01_hello_dspy
+
+# Example: Use mock (no API key)
+export LM_PROVIDER='mock'
+python run.py lesson 01_hello_dspy
+```
+
+See `.env.example` for all configuration options.
 
 ## Structure
 
