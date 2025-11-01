@@ -4,21 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-DSPy (Declarative Self-improving Python) is a framework for programming—not prompting—language models. It enables building modular AI systems with algorithms for optimizing their prompts and weights.
+This repo is a fork of the DSPy project (https://dspy.ai/).
 
-It's imparitive to understand the objective of code produced by our work in this repository, is for personal training reasons. As a complete novice to AI programming in general, my grasp of DSPy is based on a realization that it's going to be a very important skill to have as i widen my knowledge of AI and LLMs. 
+It's imperative to understand the objective of code produced by our work in this repository, is for personal training reasons. As a complete novice to AI programming in general, my grasp of DSPy is based on a realization that it's going to be a very important skill to have as I widen my knowledge of AI and LLMs.
 
 So rather than brainstorming new features or optimizations, the goal here is to produce lesson plans and exercises that will help me understand how to use DSPy effectively, and how to build AI systems with it.
 
-I've had great success learning how to use complex system when i've been able to see the progression from 'Hello Worlds' to more mid-level examples. In that context, my initial interest in DSPy has been the aspect that using it is a way to script one's interactions with the LLM instead of the more conventional 'chat' interface.
+I've had great success learning how to use complex system when I've been able to see the progression from 'Hello Worlds' to more mid-level examples. In that context, my initial interest in DSPy has been the aspect that using it is a way to script one's interactions with the LLM instead of the more conventional 'chat' interface.
 
 I'm very much aware that my thought process is more aligned with scripting than chatting. Therefore, as we begin developing courseware let's consider this to be our 'Hello World' example.
 
 One style rule that i'd like to specify without knowing anything else about DSPy is that any document produced by any agent should not violate rules of common linters.
 
 **Documentation:** https://dspy.ai/
-**Discord:** https://discord.gg/XCGy2WDCQB
-**Version:** 3.0.4b1
 
 ## Core Commands
 
@@ -27,25 +25,12 @@ One style rule that i'd like to specify without knowing anything else about DSPy
 ```bash
 # Recommended: Using uv (Rust-based package manager)
 uv sync --extra dev
-
-# Alternative: Using conda + pip
-conda create -n dspy-dev python=3.11
-conda activate dspy-dev
-pip install -e ".[dev]"
 ```
 
 ### Running Tests
 
 ```bash
-# With uv
-uv run pytest tests/predict              # Test specific module
-uv run pytest tests/ -m "not reliability" # Skip reliability tests
-uv run pytest tests/ -m "not llm_call"   # Skip real LM tests
-uv run pytest tests/predict/test_predict.py::TestPredict::test_forward  # Single test
-
-# Without uv
-pytest tests/predict
-pytest tests/ -k "test_bootstrap"        # Run tests matching pattern
+Since i'm not making modifications to the codebase, running tests is not a priority.
 ```
 
 ### Code Quality
@@ -69,6 +54,7 @@ cd docs
 pip install -r requirements.txt
 mkdocs serve  # Local preview at http://localhost:8000
 ```
+
 
 ## Architecture Overview
 
