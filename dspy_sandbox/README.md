@@ -1,6 +1,8 @@
 # DSPy Learning Sandbox
 
-A progressive learning environment for mastering DSPy through scripting, not prompting.
+A combination of a progressive learning environment for mastering DSPy through scripting and an adhoc runner to execute live DSPy calls.
+
+
 
 ## Philosophy
 

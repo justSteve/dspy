@@ -26,18 +26,18 @@ DSPy stands for Declarative Self-improving Python. Instead of brittle prompts, y
 
 ## Installation
 
-
+<!-- 
 ```bash
 pip install dspy
 ```
 
-To install the very latest from `main`:
+To install the very latest from `main` {my fork please}:
 
 ```bash
-pip install git+https://github.com/stanfordnlp/dspy.git
-````
+pip install git+https://github.com/juststeve/dspy.git
+```` -->
 
-
+I leave the above commented out refinforce the following -- this repo is not a fork of the original. It'
 
 
 ## 📜 Citation & Reading More
